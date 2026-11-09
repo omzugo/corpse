@@ -1,17 +1,37 @@
-// Annotator: your rewrite. Build it one step at a time; each step should run before you start the next.
-//   1. show one image, fitted to the window; ← → to move through the collection
-//   2. zoom with the scroll wheel; hold Space and drag to pan
-//   3. U / L to choose a line, then click twice to draw it
-//   4. drag a line's ends
-//   5. save after each change (saveAnnotation, in given.js)
-//   6. the loupe
-//   7. strip checkboxes, reject, next unannotated, and the text
-// The working prototype is in ../exquisite-corpse/annotator.js if you want to compare.
+let images = [];
+let annotations = {};
+let current = 0;
 
-function setup() {
+async function setup() {
   createCanvas(windowWidth, windowHeight);
+  ({ images, annotations } = await loadData ()); 
 }
 
 function draw() {
   background(0);
+  if (images.length === 0) return; // if there is no image yet do not draw yet
+
+  const img = getImage (images[current]);
+  if (img) {
+    const s = min(width / img.width, height / img.height);
+    const w = img.width * s;
+    const h = img.height * s;
+    const x = (width - w) / 2;
+    const y = (height - h) / 2;
+    image (img, x, y, w, h); 
+  }
+}
+
+function keyPressed() {
+  if (keyCode === RIGHT_ARROW) {
+  current = (current + 1) % images.length;
+  }
+  if (keyCode === LEFT_ARROW){
+  current = (current - 1  + images.length) % images.length;
+  }
+  keepOnlyImages([images[current].id]); // keep only current image
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
