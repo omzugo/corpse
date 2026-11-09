@@ -1,6 +1,8 @@
 let images = [];
 let annotations = {};
 let current = 0;
+let view = {x:0, y:0, s:1};
+let fitted = false;
 
 async function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -13,13 +15,21 @@ function draw() {
 
   const img = getImage (images[current]);
   if (img) {
-    const s = min(width / img.width, height / img.height);
-    const w = img.width * s;
-    const h = img.height * s;
-    const x = (width - w) / 2;
-    const y = (height - h) / 2;
-    image (img, x, y, w, h); 
+  if(!fitted) fit(img);
+
+  push();
+  translate(view.x, view.y);
+  scale(view.s);
+  image(img,0,0);
+  pop();
   }
+}
+
+function fit(img) {
+  view.s = min(width/img.width, height / img.height);
+  view.x = (width - img.width * view.s) / 2;
+  view.y = (height - img.height * view.s) / 2;
+  fitted = true;
 }
 
 function keyPressed() {
@@ -30,8 +40,19 @@ function keyPressed() {
   current = (current - 1  + images.length) % images.length;
   }
   keepOnlyImages([images[current].id]); // keep only current image
+  fitted = false; // the new image needs fitting
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  fitted = false; // the new image needs fitting
+}
+
+function mouseWheel (event) {
+  const zoom = event.delta > 0 ? 0.9 : 1.1;
+  const newS = constrain(view.s * zoom, 0.05, 8);
+  view.x = mouseX-(mouseX - view.x) * (newS / view.s);
+  view.y = mouseY - (mouseY - view.y) * (newS / view.s);
+  view.s = newS;
+  return false;
 }
