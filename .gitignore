@@ -1,0 +1,5 @@
+# a link to ../exquisite-corpse/data (images are too big for git; deploying will handle data separately)
+data
+__pycache__/
+.DS_Store
+*.tmp
