@@ -3,6 +3,8 @@ let annotations = {};
 let current = 0;
 let view = {x:0, y:0, s:1};
 let fitted = false;
+let panning = false;
+
 
 async function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -34,12 +36,13 @@ function fit(img) {
 
 function keyPressed() {
   if (keyCode === RIGHT_ARROW) {
-  current = (current + 1) % images.length;
+    current = (current + 1) % images.length;
+  } else if (keyCode === LEFT_ARROW) {
+    current = (current - 1 + images.length) % images.length;
+  } else {
+    return;
   }
-  if (keyCode === LEFT_ARROW){
-  current = (current - 1  + images.length) % images.length;
-  }
-  keepOnlyImages([images[current].id]); // keep only current image
+  keepOnlyImages([images[current].id]); // keep only the current image
   fitted = false; // the new image needs fitting
 }
 
@@ -55,4 +58,20 @@ function mouseWheel (event) {
   view.y = mouseY - (mouseY - view.y) * (newS / view.s);
   view.s = newS;
   return false;
+}
+
+function mousePressed () {
+  if (!keyIsDown(SHIFT)) panning = true;
+}
+
+function mouseDragged(){
+  if(panning){
+    view.x+=movedX;
+    view.y+= movedY;
+  }
+}
+
+function mouseReleased(){
+  panning = false;
+
 }
